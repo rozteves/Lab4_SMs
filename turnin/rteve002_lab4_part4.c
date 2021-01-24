@@ -12,29 +12,43 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States{Start, loop, changeLock} state;
-
-//global variables
-unsigned char cnt = 0;
-unsigned char prev = 0;
-// #-X-Y-Z
-unsigned char arr[8] = {0x04, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00};
+enum States{Start, button, check, press, release} state;
 
 void Tick(){
 	//Transitions
 	switch(state){
 		case Start:
-			state = loop;
+			state = button;
 			break;
-		case loop:
-			if(cnt == 7){
-				state = changeLock;
+		case button:
+			if(PINA == 0x04){
+				state = check;
 			}
 			else
-				state = loop;
+				state = button;
 			break;
-		case changeLock:
-			state = Start;
+		case check:
+			if(PINA == 0x04){
+				state = check;
+			}
+			else if(PINA == 0x00){
+				state = release;
+			}
+			else
+				state = button;
+			break;
+		case release:
+			if(PINA == 0x00){
+				state = release;
+			}
+			else if(PINA == 0x02){
+				state = press;
+			}
+			else
+				state = button;
+			break;
+		case press:
+			state = button;
 			break;
 		default:
 			state = Start;
@@ -44,31 +58,26 @@ void Tick(){
 	switch(state){
 		case Start:
 			break;
-		case loop:
+		case button:
+		case check:
+		case release:
 			if(PINA == 0x80){
 				PORTB = 0x00;
-				cnt = 0;
-			}
-			if(cnt < 8 && PINA == arr[cnt]){
-				if(PINA == prev){
-					cnt = cnt;
-				}
-				else
-					cnt++;
-				prev = PINA;
 			}
 			break;
-		case changeLock: 
-			if(PORTB == 0x00){
-				PORTB = 0x01;
-				cnt = 0;
-			}
-			else{
+		case press:
+			if(PINA == 0x80){
 				PORTB = 0x00;
-				cnt = 0;
 			}
-			prev = PINA;
-			break;
+			else if(PORTB == 0x00){//change lock
+				PORTB = 0x01;
+			}
+			else if(PORTB == 0x01){//change lock
+				PORTB = 0x00;
+			}
+			else
+				PORTB = 0x00;
+			break;	
 		default:
 			PORTB = 0x00;
 			break;

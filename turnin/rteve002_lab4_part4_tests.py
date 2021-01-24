@@ -15,36 +15,23 @@
 # that they are not ran in isolation but in the order shown and the state of the device is not reset or 
 # altered in between executions (unless preconditions are used).
 
-tests = [ 
-     {'description': 'type #XYX once => PINB: 0X01',
-     'steps':[
-     {'inputs': [('PINA',0x04)], 'iterations': 3},
-     {'inputs': [('PINA',0x00)], 'iterations': 3},
-     {'inputs': [('PINA',0x01)], 'iterations': 3},
-     {'inputs': [('PINA',0x00)], 'iterations': 3},
-     {'inputs': [('PINA',0x02)], 'iterations': 3},
-     {'inputs': [('PINA',0x00)], 'iterations': 3},
-     {'inputs': [('PINA',0x01)], 'iterations': 3},
-     ],
-     'expected': [('PORTB',0x01)],
-     },
-
-     {'description': 'type #XYX twice => PINB: 0X00',
-     'steps':[
-     {'inputs': [('PINA',0x00)], 'iterations': 5},
-     {'inputs': [('PINA',0x04)], 'iterations': 5},
-     {'inputs': [('PINA',0x00)], 'iterations': 5},
-     {'inputs': [('PINA',0x01)], 'iterations': 5},
-     {'inputs': [('PINA',0x00)], 'iterations': 5},
-     {'inputs': [('PINA',0x02)], 'iterations': 5},
-     {'inputs': [('PINA',0x00)], 'iterations': 5},
-     {'inputs': [('PINA',0x01)], 'iterations': 5},
-     {'inputs': [('PINA',0x00)], 'iterations': 5},
-    ],
-     'expected': [('PORTB',0x00)],
-     },
-
-]
+tests = [   {'description': 'set pina to 0x04, expected result = 0x00',
+    'steps': [ # Set PIN to val then run one iteration
+        {'inputs': [('PINA',0x04)], 'iterations': 1 }, # Set PIN to val then run 300 ms
+        {'inputs': [('PINA',0x00)], 'iterations': 1 }], 
+	'expected': [('PORTB',0x00)] , 
+    },
+	{'description': 'pina 0x04, 0x00, 0x02, expected result = 0x01',
+	'steps': [ { 'inputs' : [('PINA', 0x04)], 'iterations' : 1},
+	{'inputs': [('PINA', 0x00)], 'iterations' : 5},
+	{'inputs' : [('PINA', 0x02)], 'iterations' : 1 }],
+	'expected': [('PORTB', 0x01)],
+   },
+	{'description': 'checking 0x04, expected result = 0x00',
+	'steps' : [ {'inputs': [('PINA', 0x04)], 'iterations': 1 }],
+	'expected': [('PORTB' , 0x01)],
+	},
+    ]
 
 # Optionally you can add a set of "watch" variables these need to be global or static and may need
 # to be scoped at the function level (for static variables) if there are naming conflicts. The 
